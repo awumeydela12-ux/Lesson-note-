@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lesson Note Generator</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0f5b3a">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#f7f8f5;--card:#fff;--ink:#17231c;--mute:#5b6a61;--line:#d9e0da;--rule:#3d4a43;--brand:#0f5b3a;--gold:#e0a824;--onbrand:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101613;--card:#18211c;--ink:#e8efe9;--mute:#9db0a4;--line:#2b3a31;--rule:#7f9488;--brand:#3fae7a;--onbrand:#08130d}}
+:root[data-theme="dark"]{--bg:#101613;--card:#18211c;--ink:#e8efe9;--mute:#9db0a4;--line:#2b3a31;--rule:#7f9488;--brand:#3fae7a;--onbrand:#08130d}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Public Sans",system-ui,sans-serif}
+header{background:var(--brand);color:var(--onbrand);padding:22px 18px;border-bottom:5px solid var(--gold)}
+header h1{margin:0;font-size:1.5rem}
+header p{margin:4px 0 0;opacity:.9;font-size:.95rem}
+main{max-width:860px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:1.1rem;margin:0 0 12px}
+label{display:block;font-weight:600;font-size:.9rem;margin:12px 0 4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px}
+textarea{min-height:70px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.row{grid-template-columns:1fr}}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:12px 18px;cursor:pointer;background:var(--brand);color:var(--onbrand)}
+button.alt{background:transparent;color:var(--brand);border:1px solid var(--brand)}
+button:disabled{opacity:.6;cursor:wait}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hint{color:var(--mute);font-size:.85rem;margin:6px 0 0}
+.err{color:#b3261e;font-weight:600}
+#out{display:none}
+#savedBox{margin-top:24px;border-top:1px solid var(--line);padding-top:14px}
+.sv{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:10px}
+.svb{display:flex;gap:6px;flex-wrap:wrap}
+.svb button{padding:8px 12px;font-size:.85rem}
+.lesson+.lesson{margin-top:32px}
+.ttl{text-align:center;font-weight:700;letter-spacing:.08em;margin:0 0 8px}
+.sheet{border-top:1.5px solid var(--rule);border-left:1.5px solid var(--rule);font-size:.9rem}
+.g,.ph{display:grid}
+.g1{grid-template-columns:1fr}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1.6fr 1fr 1fr}
+.g5{grid-template-columns:1.4fr 1fr 1.1fr .8fr .8fr}
+.ph{grid-template-columns:.7fr 1.4fr 3fr 1.6fr}
+.c{border-right:1.5px solid var(--rule);border-bottom:1.5px solid var(--rule);padding:6px 8px;min-height:2.4em;overflow-wrap:anywhere}
+.c b{display:block;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.c p{margin:3px 0}
+.ph .h{background:var(--bg);font-weight:700;font-size:.82rem}
+.ml{display:none!important}
+@media (max-width:600px){.g2,.g3,.g5{grid-template-columns:1fr 1fr}.ph{grid-template-columns:1fr}.ph .h{display:none}.ml{display:block!important}}
+@media print{header,#form,.actions,#msg{display:none}body{background:#fff;color:#000}.card{border:0;padding:0}.lesson{break-after:page}.c b{color:#000}}
+</style>
+</head>
+<body>
+<header><h1>Lesson Note Generator</h1><p>Fill in your details. The rest is written in your lesson note book layout.</p></header>
+<main>
+<section class="card" id="form">
+<h2>Your lesson details</h2>
+<label for="mode">Lesson note type</label><select id="mode"><option value="daily">Daily (one lesson)</option><option value="weekly">Weekly (Monday to Friday)</option></select>
+<div class="row">
+<div><label for="week">Week ending</label><input id="week" type="date"></div>
+<div id="dayWrap"><label for="day">Day</label><select id="day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></div>
+</div>
+<div class="row">
+<div><label for="subject">Subject</label><input id="subject" list="subs" placeholder="e.g. Mathematics"><datalist id="subs"><option>Mathematics</option><option>English Language</option><option>Science</option><option>Computing</option><option>Our World Our People</option><option>Religious and Moral Education</option><option>Creative Arts</option><option>Social Studies</option><option>Ghanaian Language</option><option>Career Technology</option><option>Creative Arts and Design</option><option>History</option></datalist></div>
+<div><label for="dur">Duration</label><select id="dur"><option value="30">30 minutes</option><option value="40">40 minutes</option><option value="60" selected>60 minutes</option></select></div>
+</div>
+<div class="row">
+<div><label for="cls">Class</label><input id="cls" list="cl" placeholder="e.g. Basic 5"><datalist id="cl"><option>Basic 1</option><option>Basic 2</option><option>Basic 3</option><option>Basic 4</option><option>Basic 5</option><option>Basic 6</option><option>JHS 1</option><option>JHS 2</option><option>JHS 3</option></datalist></div>
+<div><label for="size">Class size</label><input id="size" type="number" min="1" placeholder="e.g. 42"></div>
+</div>
+<div class="row">
+<div><label for="period">Period (optional)</label><input id="period" placeholder="e.g. 2"></div>
+<div><label for="lesson">Lesson (optional)</label><input id="lesson" placeholder="e.g. 1"></div>
+</div>
+<div class="row">
+<div><label for="strand">Strand</label><input id="strand" placeholder="e.g. Number"></div>
+<div><label for="sub">Sub-strand</label><input id="sub" placeholder="e.g. Fractions"></div>
+</div>
+<label for="ind">Indicator (code)</label><textarea id="ind" placeholder="Code and statement from the GES curriculum"></textarea>
+<label for="cs">Content standard (code)</label><textarea id="cs" placeholder="Code and statement from the GES curriculum"></textarea>
+<label for="code">Access code (optional)</label><input id="code" placeholder="Enter your code for unlimited notes" autocomplete="off">
+<p class="hint" id="quota"></p>
+<div class="actions"><button id="gen">Generate lesson note</button></div>
+<p class="hint err" id="err" role="alert"></p>
+<div id="savedBox"><h2>Saved lesson notes</h2><div id="saved"></div></div>
+</section>
+<section class="card" id="out">
+<div id="note"></div>
+<div class="actions"><button id="copy">Copy text</button><button class="alt" id="share">Share note</button><button class="alt" id="print">Print or save as PDF</button><button class="alt" id="edit">Edit details</button></div>
+<p class="hint" id="msg" role="status"></p>
+</section>
+</main>
+<script>
+var $=function(i){return document.getElementById(i)};
+var F=["mode","week","day","subject","dur","cls","size","period","lesson","strand","sub","ind","cs"];
+var OPT=["period","lesson"];
+var NAMES={mode:"Lesson note type",week:"Week ending",day:"Day",subject:"Subject",dur:"Duration",cls:"Class",size:"Class size",strand:"Strand",sub:"Sub-strand",ind:"Indicator",cs:"Content standard"};
+var DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday"];
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function list(a){return (Array.isArray(a)?a:[a]).filter(Boolean)}
+function ps(a){return list(a).map(function(x){return "<p>"+esc(x).replace(/^(Teacher|Learners?):/,"<strong>$1:</strong>")+"</p>"}).join("")}
+function C(l,h){return '<div class="c"><b>'+l+"</b>"+h+"</div>"}
+function P(v){var p=v.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function dateOf(iso,i){var d=P(iso);d.setDate(d.getDate()-((d.getDay()+6)%7)+i);return d.toLocaleDateString("en-GB")}
+try{var s=JSON.parse(localStorage.getItem("lng5")||"{}");F.forEach(function(k){if(s[k])$(k).value=s[k]})}catch(e){}
+function save(){try{var o={};F.forEach(function(k){o[k]=$(k).value});localStorage.setItem("lng5",JSON.stringify(o))}catch(e){}}
+function fail(t){$("err").textContent=t}
+var DEV=(function(){try{var d=localStorage.getItem("lng_dev");if(!d){d=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("lng_dev",d)}return d}catch(e){return "anon"+Math.random().toString(36).slice(2)}})();
+function hdr(){return {"content-type":"application/json","x-device-id":DEV,"x-access-code":$("code").value.trim()}}
+function quota(q){$("quota").textContent=q.unlimited?"Access code active. Notes left today: "+q.remaining:"Free notes left: "+q.remaining}
+function refreshQuota(){fetch("/api/status",{headers:hdr()}).then(function(r){return r.json()}).then(quota).catch(function(){})}
+async function api(v,n,total){
+ var r=await fetch("/api/generate",{method:"POST",headers:hdr(),body:JSON.stringify({v:v,n:n,total:total})});
+ var d=await r.json().catch(function(){return {}});
+ if(!r.ok)throw {code:d.error,message:d.message||"Something went wrong. Check your connection and try again."};
+ quota(d);return d.note;
+}
+function render(v,d){
+ var i=DAYS.indexOf(v.day),st=d.starter||{},mn=d.main||{},pl=d.plenary||{};
+ var h='<div class="lesson"><div class="ttl">'+(v.mode==="weekly"?"WEEKLY":"DAILY")+' : LESSON PLAN</div><div class="sheet">';
+ h+='<div class="g g3">'+C("Subject",esc(v.subject))+C("Class",esc(v.cls))+C("Class size",esc(v.size))+"</div>";
+ h+='<div class="g g5">'+C("Week ending",P(v.week).toLocaleDateString("en-GB"))+C("Day",esc(v.day))+C("Date",dateOf(v.week,i))+C("Period",esc(v.period))+C("Lesson",esc(v.lesson))+"</div>";
+ h+='<div class="g g2">'+C("Strand",esc(v.strand))+C("Sub-strand",esc(v.sub))+"</div>";
+ h+='<div class="g g2">'+C("Indicator (code)",esc(v.ind))+C("Content standard (code)",esc(v.cs))+"</div>";
+ h+='<div class="g g1">'+C("Performance indicator",ps(d.performanceIndicator))+"</div>";
+ h+='<div class="g g2">'+C("Core competencies",ps(d.coreCompetencies))+C("Key words",esc(list(d.keywords).join(", ")))+"</div>";
+ h+='<div class="g g2">'+C("T.L.R.(s)",ps(d.tlr))+C("Ref",ps(d.references))+"</div>";
+ h+='<div class="ph"><div class="c h">Day</div><div class="c h">Phase 1: Starter (preparing the brain for learning)</div><div class="c h">Phase 2: Main (new learning including assessment)</div><div class="c h">Phase 3: Plenary / Reflections</div>';
+ h+='<div class="c"><b class="ml">Day</b>'+esc(v.day)+"</div>";
+ h+='<div class="c"><b class="ml">Phase 1: Starter (preparing the brain for learning)</b><p><em>'+esc(st.minutes)+" min</em></p>"+ps(st.activities)+"</div>";
+ h+='<div class="c"><b class="ml">Phase 2: Main (new learning including assessment)</b><p><em>'+esc(mn.minutes)+" min</em></p>"+ps(mn.activities)+"<p><strong>Assessment:</strong></p>"+ps(mn.assessment)+"</div>";
+ h+='<div class="c"><b class="ml">Phase 3: Plenary / Reflections</b><p><em>'+esc(pl.minutes)+" min</em></p>"+ps(pl.activities)+"<p><strong>Reflection:</strong></p>"+ps(pl.reflection)+"</div></div></div></div>";
+ return h;
+}
+var KEY="lng_saved";
+function getSaved(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){return []}}
+function putSaved(a){try{localStorage.setItem(KEY,JSON.stringify(a));return true}catch(e){return false}}
+function showNote(h){$("note").innerHTML=h;$("out").style.display="block";$("form").style.display="none";$("msg").textContent="";window.scrollTo(0,0)}
+function saveNote(v,h){
+ var a=getSaved();
+ a.unshift({id:Date.now().toString(36),mode:v.mode,subject:v.subject,cls:v.cls,sub:v.sub,day:v.day,weekTxt:P(v.week).toLocaleDateString("en-GB"),savedTxt:new Date().toLocaleDateString("en-GB"),v:v,html:h});
+ a=a.slice(0,40);
+ while(!putSaved(a)&&a.length>1)a.pop();
+ var ok=getSaved().length>0&&getSaved()[0].id===a[0].id;
+ renderSaved();return ok;
+}
+function renderSaved(){
+ var h="";
+ getSaved().forEach(function(e){
+  h+='<div class="sv"><div><strong>'+esc(e.subject)+" · "+esc(e.cls)+" · "+esc(e.sub)+" · "+(e.mode==="weekly"?"Weekly":"Daily, "+esc(e.day))+'</strong><div class="hint">Week ending '+esc(e.weekTxt)+" · saved "+esc(e.savedTxt)+'</div></div><div class="svb"><button data-a="open" data-id="'+esc(e.id)+'">Open</button><button class="alt" data-a="reuse" data-id="'+esc(e.id)+'">Reuse details</button><button class="alt" data-a="del" data-id="'+esc(e.id)+'">Delete</button></div></div>';
+ });
+ $("saved").innerHTML=h||'<p class="hint">Nothing saved yet. Each lesson note you generate is saved here automatically, on this device.</p>';
+}
+$("saved").onclick=function(ev){
+ var t=ev.target.closest("button");if(!t)return;
+ var a=getSaved(),e=a.filter(function(x){return x.id===t.dataset.id})[0];if(!e)return;
+ if(t.dataset.a==="open"){showNote(e.html);$("msg").textContent="Saved note opened."}
+ else if(t.dataset.a==="reuse"){F.forEach(function(k){if(e.v[k]!=null)$(k).value=e.v[k]});$("mode").onchange();window.scrollTo(0,0)}
+ else if(t.dataset.a==="del"){
+  if(t.dataset.arm!=="1"){t.dataset.arm="1";t.textContent="Tap again to delete";return}
+  putSaved(a.filter(function(x){return x.id!==e.id}));renderSaved();
+ }
+};
+renderSaved();
+try{$("code").value=localStorage.getItem("lng_code")||""}catch(e){}
+$("code").onchange=function(){try{localStorage.setItem("lng_code",$("code").value.trim())}catch(e){}refreshQuota()};
+refreshQuota();
+$("mode").onchange=function(){$("dayWrap").style.display=$("mode").value==="weekly"?"none":"block";save()};
+$("mode").onchange();
+$("gen").onclick=async function(){
+ fail("");
+ var weekly=$("mode").value==="weekly";
+ var v={};F.forEach(function(k){v[k]=$(k).value.trim()});
+ var miss=F.filter(function(k){return k!=="mode"&&OPT.indexOf(k)<0&&!(weekly&&k==="day")&&!v[k]}).map(function(k){return NAMES[k]});
+ if(miss.length){fail("Please fill in: "+miss.join(", ")+".");return}
+ save();
+ var b=$("gen"),html="",i=0,days=weekly?DAYS:[v.day];
+ b.disabled=true;
+ try{
+  for(i=0;i<days.length;i++){
+   b.textContent=weekly?"Writing "+days[i]+" ("+(i+1)+" of 5)…":"Writing your lesson note… (up to a minute)";
+   var vv=Object.assign({},v,{day:days[i]}),pv=Object.assign({},vv);
+   ["mode","period","lesson","week"].forEach(function(k){delete pv[k]});
+   var d=await api(pv,i+1,days.length);
+   html+=render(vv,d);
+  }
+  showNote(html);
+  $("msg").textContent=saveNote(v,html)?"Saved on this device. Find it under Saved lesson notes.":"Could not save on this device. Use Print or save as PDF to keep it.";
+ }catch(e){
+  var m=e&&e.message?e.message:"Something went wrong. Check your connection and tap Generate again.";
+  if(html){showNote(html);saveNote(v,html);$("msg").textContent="Stopped at "+days[i]+". "+m+" The days finished so far are shown and saved."}else fail(m);
+ }finally{b.disabled=false;b.textContent="Generate lesson note"}
+};
+$("edit").onclick=function(){$("out").style.display="none";$("form").style.display="block";window.scrollTo(0,0)};
+$("print").onclick=function(){window.print()};
+function doCopy(){
+ var ok=function(){$("msg").textContent="Copied. Paste it into Word or WhatsApp."},no=function(){$("msg").textContent="Copy is blocked here. Use Print or save as PDF instead."};
+ try{navigator.clipboard.writeText($("note").innerText).then(ok,no)}catch(e){no()}
+}
+$("copy").onclick=doCopy;
+$("share").onclick=async function(){
+ try{if(navigator.share){await navigator.share({title:"Lesson note",text:$("note").innerText});return}}catch(e){if(e&&e.name==="AbortError")return}
+ doCopy();
+};
+</script>
+</body>
+</html>
